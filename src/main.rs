@@ -158,7 +158,7 @@ pub fn main() {
 					[0.0, obj.size.y, 0.0, 0.0],
 					[0.0, 0.0, 1.0, 0.0],
 					[obj.position.x, obj.position.y, 1.0, 1.0]
-					
+				]
 			};
 
 			frame.draw(&rect.vx_buf, &rect.ix_buf, &program, &uniforms, &Default::default()).unwrap();
