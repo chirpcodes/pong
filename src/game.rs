@@ -20,6 +20,7 @@ impl GameState {
 		}
 	}
 
+	// Event loop for game physics and simulation.
 	pub fn update(&mut self, delta_time: f32, width: f32, height: f32) {
 		let mut ball_track: Option<(Vec2,Vec2,)> = None;
 
@@ -82,7 +83,6 @@ impl GameState {
 									// Increase and flip y velocity based on where the ball hit the paddle.
 									// Ball travels upwards if it hit the upper half, and downwards if it hit the lower half.
 									// Velocity increases the further away from the center it was hit.
-									let new_y = (obj.velocity.y * 1.15).clamp(-obj.max_velocity.y, obj.max_velocity.y).abs();
 									let angle = center.y - other.center.y;
 									let traj = ((angle.abs() * 2.0) / center.y).clamp(0.0, 1.0);
 									obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
@@ -130,12 +130,14 @@ impl GameState {
 		}
 	}
 
+	// Reset all objects to their starting state.
 	pub fn reset_objects(&mut self, width: f32, height: f32) {
 		for obj in &mut self.objects {
 			obj.reset(width, height);
 		}
 	}
 
+	// Get player-controlled object.
 	pub fn get_control(&mut self) -> &mut Object {
 		&mut self.objects[self.control_id]
 	}

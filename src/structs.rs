@@ -112,6 +112,7 @@ pub struct Object {
 }
 
 impl Object {
+	// Build a new Object with default properties.
 	pub fn new(obj_type: ObjectType) -> Self {
 		Self {
 			obj_type: obj_type,
@@ -122,11 +123,13 @@ impl Object {
 		}
 	}
 
+	// Set the size of this object inline.
 	pub fn set_size(mut self, x: f32, y: f32) -> Self {
 		self.size.set(x, y);
 		self
 	}
 
+	// Reset this object to its starting state.
 	pub fn reset(&mut self, width: f32, height: f32) {
 		match self.obj_type {
 			ObjectType::Ball => {
@@ -160,10 +163,12 @@ impl Object {
 		}
 	}
 
+	// Build an ObjectCollider for this object.
 	pub fn get_collider(&self) -> ObjectCollider {
 		ObjectCollider::new(self)
 	}
 
+	// Get the center point for this object.
 	pub fn get_center(&self) -> Vec2 {
 		Vec2 {
 			x: self.position.x + (self.size.x / 2.0),
@@ -182,6 +187,7 @@ pub struct ObjectCollider {
 }
 
 impl ObjectCollider {
+	// Build a new ObjectCollider given an Object.
 	pub fn new(obj: &Object) -> Self {
 		Self {
 			min: obj.position,
@@ -190,6 +196,7 @@ impl ObjectCollider {
 		}
 	}
 
+	// Check if this object is intercepting another collider.
 	pub fn is_colliding(&self, other: &Self) -> bool {
 		// TODO: Improved collision detection.
 		// This effectively only checks for a collision between the top-left and bottom-right corners of both objects.
