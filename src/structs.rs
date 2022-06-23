@@ -150,10 +150,7 @@ impl Object {
 	}
 
 	pub fn get_collider(&self) -> ObjectCollider {
-		ObjectCollider {
-			min: self.position,
-			max: self.position + self.size,
-		}
+		ObjectCollider::new(self)
 	}
 
 	pub fn is_out_of_bounds(&self, width: f32, height: f32) -> bool {
@@ -169,10 +166,22 @@ impl Object {
 #[derive(Copy, Clone, Debug)]
 pub struct ObjectCollider {
 	pub min: Vec2,
-	pub max: Vec2
+	pub max: Vec2,
+	pub center: Vec2
 }
 
 impl ObjectCollider {
+	pub fn new(obj: &Object) -> Self {
+		Self {
+			min: obj.position,
+			max: obj.position + obj.size,
+			center: Vec2 {
+				x: obj.position.x + (obj.size.x / 2.0),
+				y: obj.position.y + (obj.size.y / 2.0)
+			}
+		}
+	}
+
 	pub fn is_colliding(&self, other: &Self) -> bool {
 		// TODO: Improved collision detection.
 		// This effectively only checks for a collision between the top-left and bottom-right corners of both objects.
