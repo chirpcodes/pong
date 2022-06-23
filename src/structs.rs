@@ -132,7 +132,7 @@ impl Object {
 			ObjectType::Ball => {
 				self.velocity.set(
 					width / 3200.0,
-					0.1
+					0.0
 				);
 				self.max_velocity.set(
 					width / 400.0,
@@ -164,11 +164,11 @@ impl Object {
 		ObjectCollider::new(self)
 	}
 
-	pub fn is_out_of_bounds(&self, width: f32, height: f32) -> bool {
-		self.position.x < 0.0
-		|| self.position.x > width
-		|| self.position.y < 0.0
-		|| self.position.y > height
+	pub fn get_center(&self) -> Vec2 {
+		Vec2 {
+			x: self.position.x + (self.size.x / 2.0),
+			y: self.position.y + (self.size.y / 2.0)
+		}
 	}
 }
 
@@ -186,10 +186,7 @@ impl ObjectCollider {
 		Self {
 			min: obj.position,
 			max: obj.position + obj.size,
-			center: Vec2 {
-				x: obj.position.x + (obj.size.x / 2.0),
-				y: obj.position.y + (obj.size.y / 2.0)
-			}
+			center: obj.get_center()
 		}
 	}
 

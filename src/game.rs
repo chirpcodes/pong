@@ -46,8 +46,9 @@ impl GameState {
 			match obj.obj_type {
 				// Behaviour for ball movement and collision.
 				ObjectType::Ball => {
+					let center = obj.get_center();
 					// Check if ball is out of bounds.
-					if obj.is_out_of_bounds(width, height) {
+					if center.x < 0.0 || center.x > width {
 						// If it is, reset to its original position.
 						obj.reset(width, height);
 					} else {
@@ -56,22 +57,28 @@ impl GameState {
 						obj_collider.min += delta;
 						obj_collider.max += delta;
 
-						for o in 0..colliders.len() {
-							if o == i {
-								// Don't collide with self
-								continue;
-							}
+						if center.y < obj.size.y / 2.0 || center.y > height - obj.size.y / 2.0 {
+							obj.velocity.y = -obj.velocity.y;
+							delta.y = -(delta.y * 1.1);
+						} else {
+							for o in 0..colliders.len() {
+								if o == i {
+									// Don't collide with self
+									continue;
+								}
 
-							let other = &colliders[o];
-							if obj_collider.is_colliding(other) {
-								obj.velocity.x = -(obj.velocity.x * 1.15).clamp(-obj.max_velocity.x, obj.max_velocity.x);
+								let other = &colliders[o];
+								if obj_collider.is_colliding(other) {
+									obj.velocity.x = -(obj.velocity.x * 1.15).clamp(-obj.max_velocity.x, obj.max_velocity.x);
 
-								let new_y = (obj.velocity.y * 1.15).clamp(-obj.max_velocity.y, obj.max_velocity.y).abs();
-								let angle = obj_collider.center.y - other.center.y;
-								obj.velocity.y = if angle >= 0.0 { new_y } else { -new_y };
+									let new_y = (obj.velocity.y * 1.15).clamp(-obj.max_velocity.y, obj.max_velocity.y).abs();
+									let angle = center.y - other.center.y;
+									let traj = ((angle.abs() * 2.0) / center.y).clamp(0.0, 1.0);
+									obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
 
-								delta.x = -delta.x;
-								delta.y = -delta.y;
+									delta.x = -delta.x;
+									delta.y = -delta.y;
+								}
 							}
 						}
 					}
@@ -93,9 +100,10 @@ impl GameState {
 						y_tar = pos.y + (vel.y * eta);
 					}
 
-					obj.position.y = obj.position.y + (
+					obj.position.y = (obj.position.y + (
 						(y_tar - obj.size.y / 2.0) - obj.position.y
-					) * (delta_time * 0.0015 * self.ai_accuracy);
+					) * (delta_time * 0.0015 * self.ai_accuracy))
+					.clamp(obj.size.y * 0.05, height - obj.size.y * 1.05);
 				},
 				_ => ()
 			}
