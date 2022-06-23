@@ -114,7 +114,7 @@ impl Object {
 		match self.obj_type {
 			ObjectType::Ball => {
 				self.velocity.x = width / 3200.0;
-				self.velocity.y = 0.00;
+				self.velocity.y = 0.05;
 				self.max_velocity.x = width / 400.0;
 				self.max_velocity.y = height / 400.0;
 				self.position.x = (width / 2.0) - (self.size.x / 2.0);
