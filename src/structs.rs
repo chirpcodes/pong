@@ -1,6 +1,6 @@
 // Dependencies
 
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign, Sub};
 
 // Imports from the Glium library:
 use glium::{
@@ -51,6 +51,16 @@ impl AddAssign for Vec2 { // Implement += operator for this struct
 	}
 }
 
+impl Sub for Vec2 { // Implement - operator for this struct
+	type Output = Self;
+
+	fn sub(mut self, other: Vec2) -> Self {
+		self.x -= other.x;
+		self.y -= other.y;
+		self
+	}
+}
+
 // Implement a Rect struct representing a drawn rectangle.
 
 pub struct Rect {
@@ -86,6 +96,7 @@ impl Rect {
 // Implement an Object struct representing a game object.
 // These objects have a type, they can be either a Ball or a Paddle.
 
+#[derive(PartialEq)]
 pub enum ObjectType {
 	Ball,
 	PaddleLeft,

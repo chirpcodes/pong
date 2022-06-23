@@ -7,20 +7,28 @@ use crate::structs::{Vec2, Object, ObjectType};
 
 pub struct GameState {
 	pub objects: Vec<Object>,
-	pub control_id: usize
+	pub control_id: usize,
+	pub ai_accuracy: f32
 }
 
 impl GameState {
 	pub fn new() -> Self {
 		Self {
 			objects: vec![],
-			control_id: 0
+			control_id: 0,
+			ai_accuracy: 0.5
 		}
 	}
 
 	pub fn update(&mut self, delta_time: f32, width: f32, height: f32) {
+		let mut ball_track: Option<(Vec2,Vec2,)> = None;
+
 		let mut colliders = vec![];
 		for obj in &self.objects {
+			if obj.obj_type == ObjectType::Ball {
+				ball_track = Some((obj.position, obj.velocity,));
+			}
+
 			colliders.push(obj.get_collider());
 		}
 
@@ -36,6 +44,7 @@ impl GameState {
 			};
 
 			match obj.obj_type {
+				// Behaviour for ball movement and collision.
 				ObjectType::Ball => {
 					// Check if ball is out of bounds.
 					if obj.is_out_of_bounds(width, height) {
@@ -66,6 +75,27 @@ impl GameState {
 							}
 						}
 					}
+				},
+				// AI behaviour for non-controlled paddle.
+				ObjectType::PaddleLeft => if let Some(track) = ball_track {
+					let (pos, vel) = track;
+
+					let is_incoming = if obj_collider.center.x < pos.x {
+						vel.x < 0.0
+					} else {
+						vel.x > 0.0
+					};
+
+					let mut y_tar = (height / 2.0) - (obj.size.y / 2.0);
+					if is_incoming {
+						let x_diff = obj_collider.center.x - pos.x;
+						let eta = x_diff / vel.x;
+						y_tar = pos.y + (vel.y * eta);
+					}
+
+					obj.position.y = obj.position.y + (
+						(y_tar - obj.size.y / 2.0) - obj.position.y
+					) * (delta_time * 0.0015 * self.ai_accuracy);
 				},
 				_ => ()
 			}
