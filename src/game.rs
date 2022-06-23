@@ -59,11 +59,7 @@ impl GameState {
 
 								let new_y = (obj.velocity.y * 1.15).clamp(-obj.max_velocity.y, obj.max_velocity.y).abs();
 								let angle = obj.position.y + (obj.size.y / 2.0) - (other.min.y + ((other.max.y - other.min.y) / 2.0));
-								obj.velocity.y = if angle >= 0.0 {
-									new_y
-								} else {
-									-new_y
-								};
+								obj.velocity.y = if angle >= 0.0 { new_y } else { -new_y };
 
 								delta.x = -delta.x;
 								delta.y = -delta.y;

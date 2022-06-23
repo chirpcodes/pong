@@ -64,13 +64,15 @@ pub fn main() {
 
 	let program = Program::from_source(&display, VERTEX_SHADER_SRC, FRAGMENT_SHADER_SRC, None).unwrap();
 
+	// Create the game state handler.
+	let mut game = GameState::new();
+
 	// Create the objects to be rendered in the game.
 	// Since the game only uses basic rect shapes, it's more performant to build a single VBO here and manipulate it to fit each rendered object.
 
 	let rect = Rect::new(&display, 1.0, 1.0);
 
-	let mut game = GameState::new();
-
+	// Initialise objects
 	game.objects = vec![
 		Object::new(ObjectType::Ball).set_size(25.0, 25.0),
 		Object::new(ObjectType::PaddleLeft).set_size(25.0, 100.0),
@@ -140,26 +142,26 @@ pub fn main() {
 			perspective_update = false;
 		}
 
-		// Execute a game update tick for this frame.
+		// Execute an update tick for the game state.
 
 		game.update(delta_time, width, height);
 
 		// Iterate through each object and render them.
 
 		for obj in &game.objects {
-				// Render this object.
+			// Render this object.
 
-				let uniforms = uniform!{
-					perspective: perspective.unwrap(),
-					matrix: [
-						[obj.size.x, 0.0, 0.0, 0.0],
-						[0.0, obj.size.y, 0.0, 0.0],
-						[0.0, 0.0, 1.0, 0.0],
-						[obj.position.x, obj.position.y, 1.0, 1.0]
-					]
-				};
+			let uniforms = uniform!{
+				perspective: perspective.unwrap(),
+				matrix: [
+					[obj.size.x, 0.0, 0.0, 0.0],
+					[0.0, obj.size.y, 0.0, 0.0],
+					[0.0, 0.0, 1.0, 0.0],
+					[obj.position.x, obj.position.y, 1.0, 1.0]
+					
+			};
 
-				frame.draw(&rect.vx_buf, &rect.ix_buf, &program, &uniforms, &Default::default()).unwrap();
+			frame.draw(&rect.vx_buf, &rect.ix_buf, &program, &uniforms, &Default::default()).unwrap();
 		}
 
 		frame.finish().unwrap();
