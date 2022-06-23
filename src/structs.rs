@@ -121,7 +121,7 @@ impl Object {
 			ObjectType::Ball => {
 				self.velocity.set(
 					width / 3200.0,
-					0.00
+					0.1
 				);
 				self.max_velocity.set(
 					width / 400.0,

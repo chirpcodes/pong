@@ -27,7 +27,12 @@ use glium::glutin::{
 // Import structs.rs from codebase
 
 mod structs;
-use structs::{Vec2, Rect, Object, ObjectType};
+use structs::{Rect, Object, ObjectType};
+
+// Import game.rs from codebase
+
+mod game;
+use game::GameState;
 
 // Import basic shaders from file.
 
@@ -64,14 +69,16 @@ pub fn main() {
 
 	let rect = Rect::new(&display, 1.0, 1.0);
 
-	let mut objects = vec![
+	let mut game = GameState::new();
+
+	game.objects = vec![
 		Object::new(ObjectType::Ball).set_size(25.0, 25.0),
 		Object::new(ObjectType::PaddleLeft).set_size(25.0, 100.0),
 		Object::new(ObjectType::PaddleRight).set_size(25.0, 100.0)
 	];
 
 	// Control inputs will affect the PaddleRight object.
-	let control_id = 2;
+	game.control_id = 2;
 
 	// Store the window dimensions and perspective matrix here so that it doesn't have to be recalculated every frame.
 	// Only recalculate on the initial frame or on a window resize, otherwise it isn't necessary.
@@ -119,9 +126,7 @@ pub fn main() {
 			// Reset all objects to their initial positions.
 			// This first happens when the game starts, and also prevents unintended behaviour if the window resizes.
 
-			for obj in &mut objects {
-				obj.reset(width, height);
-			}
+			game.reset_objects(width, height);
 			
 			// Build the perspective matrix.
 			perspective = Some({
@@ -135,66 +140,13 @@ pub fn main() {
 			perspective_update = false;
 		}
 
-		// Iterate through every object and update them for this frame.
+		// Execute a game update tick for this frame.
 
-		{
-			let mut colliders = vec![];
-			for obj in &objects {
-				colliders.push(obj.get_collider());
-			}
+		game.update(delta_time, width, height);
 
-			for i in 0..objects.len() {
-				let obj = &mut objects[i];
-				let mut obj_collider = colliders[i];
+		// Iterate through each object and render them.
 
-				// Handle simulation and physics for this object.
-
-				let mut delta = Vec2 {
-					x: obj.velocity.x * delta_time,
-					y: obj.velocity.y * delta_time
-				};
-
-				match obj.obj_type {
-					ObjectType::Ball => {
-						// Check if ball is out of bounds.
-						if obj.is_out_of_bounds(width, height) {
-							// If it is, reset to its original position.
-							obj.reset(width, height);
-						} else {
-							// Check if next position update will cause a collision.
-
-							obj_collider.min += delta;
-							obj_collider.max += delta;
-
-							for o in 0..colliders.len() {
-								if o == i {
-									// Don't collide with self
-									continue;
-								}
-
-								let other = &colliders[o];
-								if obj_collider.is_colliding(other) {
-									obj.velocity.x = -(obj.velocity.x * 1.15).clamp(-obj.max_velocity.x, obj.max_velocity.x);
-
-									let new_y = (obj.velocity.y * 1.15).clamp(-obj.max_velocity.y, obj.max_velocity.y).abs();
-									let angle = obj.position.y + (obj.size.y / 2.0) - (other.min.y + ((other.max.y - other.min.y) / 2.0));
-									obj.velocity.y = if angle >= 0.0 {
-										new_y
-									} else {
-										-new_y
-									};
-									
-									delta.x = -delta.x;
-									delta.y = -delta.y;
-								}
-							}
-						}
-					},
-					_ => ()
-				}
-
-				obj.position += delta;
-
+		for obj in &game.objects {
 				// Render this object.
 
 				let uniforms = uniform!{
@@ -208,14 +160,13 @@ pub fn main() {
 				};
 
 				frame.draw(&rect.vx_buf, &rect.ix_buf, &program, &uniforms, &Default::default()).unwrap();
-			}
 		}
 
 		frame.finish().unwrap();
 
 		// Handle input events from the system, such as keypresses or mouse movements.
 
-		let control_obj = &mut objects[control_id];
+		let control_obj = game.get_control();
 
 		match event {
 			// A window event has been received, check its type and handle it.
