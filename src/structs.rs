@@ -28,6 +28,13 @@ pub struct Vec2 {
 	pub y: f32
 }
 
+impl Vec2 {
+	pub fn set(&mut self, x: f32, y: f32) {
+		self.x = x;
+		self.y = y;
+	}
+}
+
 impl Add for Vec2 { // Implement + operator for this struct
 	type Output = Self;
 
@@ -113,22 +120,32 @@ impl Object {
 	pub fn reset(&mut self, width: f32, height: f32) {
 		match self.obj_type {
 			ObjectType::Ball => {
-				self.velocity.x = width / 3200.0;
-				self.velocity.y = 0.05;
-				self.max_velocity.x = width / 400.0;
-				self.max_velocity.y = height / 400.0;
-				self.position.x = (width / 2.0) - (self.size.x / 2.0);
-				self.position.y = (height / 2.0) - (self.size.y / 2.0);
+				self.velocity.set(
+					width / 3200.0,
+					0.05
+				);
+				self.max_velocity.set(
+					width / 400.0,
+					height / 400.0
+				);
+				self.position.set(
+					(width / 2.0) - (self.size.x / 2.0),
+					(height / 2.0) - (self.size.y / 2.0)
+				);
 			},
 			ObjectType::PaddleLeft => {
-				self.position.x = width * 0.05;
 				self.size.y = height * 0.25;
-				self.position.y = (height / 2.0) - (self.size.y / 2.0);
+				self.position.set(
+					width * 0.05,
+					(height / 2.0) - (self.size.y / 2.0)
+				);
 			},
 			ObjectType::PaddleRight => {
-				self.position.x = width * 0.95 - self.size.x;
 				self.size.y = height * 0.25;
-				self.position.y = (height / 2.0) - (self.size.y / 2.0);
+				self.position.set(
+					width * 0.95 - self.size.x,
+					(height / 2.0) - (self.size.y / 2.0)
+				);
 			}
 		}
 	}
