@@ -73,7 +73,7 @@ pub fn main() {
 	// Control inputs will affect the PaddleRight object.
 	let control_id = 2;
 
-	// Store the window dimension and perspective matrix here so that it doesn't have to be recalculated every frame.
+	// Store the window dimensions and perspective matrix here so that it doesn't have to be recalculated every frame.
 	// Only recalculate on the initial frame or on a window resize, otherwise it isn't necessary.
 
 	let (mut width, mut height) = (0.0, 0.0);
@@ -90,15 +90,16 @@ pub fn main() {
 	// This will keep the display window open until the event loop exits.
 
 	event_loop.run(move |event, _, control_flow| {
-		// Calculate the delta time, then set a timer for the next frame to be drawn.
+		// Set a timer for the next frame to be drawn, then calculate the delta time.
 		// Delta time will be used later when calculating movements for on-screen objects.
+
+		let next_frame_time = last_frame + Duration::from_nanos(16_666_667);
+		*control_flow = ControlFlow::WaitUntil(next_frame_time);
 
 		let now = Instant::now();
 		let delta_time = (now - last_frame).as_nanos() as f32 / 1_000_000.0;
-		last_frame = now;
 
-		let next_frame_time = now + Duration::from_nanos(16_666_667);
-		*control_flow = ControlFlow::WaitUntil(next_frame_time);
+		last_frame = now;
 
 		// Start drawing this frame.
 

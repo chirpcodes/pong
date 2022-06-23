@@ -112,8 +112,7 @@ impl Object {
 	}
 
 	pub fn set_size(mut self, x: f32, y: f32) -> Self {
-		self.size.x = x;
-		self.size.y = y;
+		self.size.set(x, y);
 		self
 	}
 
@@ -122,7 +121,7 @@ impl Object {
 			ObjectType::Ball => {
 				self.velocity.set(
 					width / 3200.0,
-					0.05
+					0.00
 				);
 				self.max_velocity.set(
 					width / 400.0,
