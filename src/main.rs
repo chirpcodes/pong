@@ -24,6 +24,11 @@ use glium::glutin::{
 	ContextBuilder
 };
 
+use glium::glutin::event::{
+	VirtualKeyCode as Key,
+	ElementState as KeyState
+};
+
 // Import structs.rs from codebase
 
 mod structs;
@@ -53,10 +58,12 @@ pub fn main() {
 	let ctx_build = ContextBuilder::new();
 	let display = Display::new(win_build, ctx_build, &event_loop).expect("Failed to create Display");
 
+	let mut is_focused = false;
+
 	{
-		/*let window = display.gl_window();
-		window.window().set_cursor_grab(true);
-		window.window().set_cursor_visible(false);*/
+		let gl_window = display.gl_window();
+		let window = gl_window.window();
+		window.set_title("Pong");
 	}
 
 	// Build a program from GLSL source code.
@@ -168,6 +175,7 @@ pub fn main() {
 
 		// Handle input events from the system, such as keypresses or mouse movements.
 
+		let is_paused = game.paused;
 		let control_obj = game.get_control();
 
 		match event {
@@ -182,15 +190,27 @@ pub fn main() {
 				event::WindowEvent::Resized(_size) => {
 					perspective_update = true;
 				},
-				// Ignore anything else.
-				_ => ()
-			},
-			// Received event from an input device (mouse, keyboard).
-			event::Event::DeviceEvent { device_id: _, event, .. } => match event {
+				// Only simulate when the window is focused.
+				event::WindowEvent::Focused(focus) => {
+					is_focused = focus;
+					game.pause(&display, !focus);
+				},
+				// The player pressed a key.
+				event::WindowEvent::KeyboardInput {device_id: _, input, is_synthetic: _} => match input.virtual_keycode.unwrap() {
+					// Pause if the player presses the escape key.
+					Key::Escape => if is_focused && input.state == KeyState::Pressed {
+						game.pause(&display, !game.paused);
+					}
+					// Ignore anything else.
+					_ => ()
+				},
+				// The player pressed a button.
+				event::WindowEvent::MouseInput { device_id: _, state: _, button: _, .. } => if is_focused {
+					game.pause(&display, false);
+				},
 				// The player moved their mouse.
-				event::DeviceEvent::MouseMotion { delta, .. } => {
-					// Change position of the player controlled object according to how much the mouse moved.
-					control_obj.position.y += delta.1 as f32 * 2.0 * delta_time;
+				event::WindowEvent::CursorMoved { device_id: _, position, .. } => if !is_paused {
+					control_obj.position.y = position.y as f32 - (control_obj.size.y / 2.0);
 				},
 				// Ignore anything else.
 				_ => ()

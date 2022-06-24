@@ -2,13 +2,16 @@
 
 use crate::structs::{Vec2, Object, ObjectType};
 
+use glium::Display;
+
 // Create a struct representing our game state.
 // This will store object states, scores, etc, and be responsible for simulating each frame update.
 
 pub struct GameState {
 	pub objects: Vec<Object>,
 	pub control_id: usize,
-	pub ai_accuracy: f32
+	pub ai_accuracy: f32,
+	pub paused: bool
 }
 
 impl GameState {
@@ -16,16 +19,20 @@ impl GameState {
 		Self {
 			objects: vec![],
 			control_id: 0,
-			ai_accuracy: 0.5
+			ai_accuracy: 0.5,
+			paused: true
 		}
 	}
 
 	// Event loop for game physics and simulation.
 	pub fn update(&mut self, delta_time: f32, width: f32, height: f32) {
-		let mut ball_track: Option<(Vec2,Vec2,)> = None;
+		// Do not simulate if game is paused.
+		if self.paused {return};
 
 		// Build a list of colliders and track ball movement.
+
 		let mut colliders = vec![];
+		let mut ball_track: Option<(Vec2,Vec2,)> = None;
 		for obj in &self.objects {
 			if obj.obj_type == ObjectType::Ball {
 				ball_track = Some((obj.position, obj.velocity,));
@@ -121,7 +128,7 @@ impl GameState {
 					obj.position.y = (obj.position.y + (
 						y_tar - obj.size.y / 2.0 - obj.position.y
 					) * (delta_time * 0.0015 * self.ai_accuracy))
-					.clamp(obj.size.y * 0.05, height - obj.size.y * 1.05);
+					.clamp(0.0, height - obj.size.y);
 				},
 				_ => ()
 			}
@@ -140,5 +147,14 @@ impl GameState {
 	// Get player-controlled object.
 	pub fn get_control(&mut self) -> &mut Object {
 		&mut self.objects[self.control_id]
+	}
+
+	// Pause or unpause the game.
+	pub fn pause(&mut self, display: &Display, pause: bool) {
+		let gl_window = display.gl_window();
+		let window = gl_window.window();
+		window.set_cursor_grab(!pause).ok();
+		window.set_cursor_visible(pause);
+		self.paused = pause;
 	}
 }
