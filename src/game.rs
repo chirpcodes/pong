@@ -19,7 +19,7 @@ impl GameState {
 		Self {
 			objects: vec![],
 			control_id: 0,
-			ai_accuracy: 0.75,
+			ai_accuracy: 0.5,
 			paused: true
 		}
 	}
@@ -139,7 +139,7 @@ impl GameState {
 					// Accuracy affects the speed of this movement.
 					obj.position.y = (obj.position.y + (
 						y_tar - (obj.size.y / 2.0) - obj.position.y
-					) * (delta_time * 0.0015 * self.ai_accuracy))
+					) * (delta_time * 0.00375 * self.ai_accuracy))
 					.clamp(0.0, height - obj.size.y);
 				},
 				_ => ()
