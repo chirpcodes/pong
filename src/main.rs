@@ -205,8 +205,10 @@ pub fn main() {
 					_ => ()
 				},
 				// The player pressed a button.
-				event::WindowEvent::MouseInput { device_id: _, state: _, button: _, .. } => if is_focused {
-					game.pause(&display, false);
+				event::WindowEvent::MouseInput { device_id: _, state, button: _, .. } => if is_focused {
+					if is_paused && state == KeyState::Pressed {
+						game.pause(&display, false);
+					}
 				},
 				// The player moved their mouse.
 				event::WindowEvent::CursorMoved { device_id: _, position, .. } => if !is_paused {
