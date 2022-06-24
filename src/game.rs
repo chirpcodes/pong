@@ -96,7 +96,7 @@ impl GameState {
 									// Velocity increases the further away from the center it was hit.
 									let angle = center.y - other.center.y;
 									let traj = ((angle.abs() * 2.0) / center.y).clamp(0.0, obj.max_velocity.y);
-									//obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
+									obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
 
 									// Update position delta.
 									delta.x = -delta.x;
