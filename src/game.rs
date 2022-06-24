@@ -32,7 +32,7 @@ impl GameState {
 		// Build a list of colliders and track ball movement.
 
 		let mut colliders = vec![];
-		let mut ball_track: Option<(Vec2,Vec2,)> = None;
+		let mut ball_track: Option<(Vec2, Vec2,)> = None;
 		for obj in &self.objects {
 			if obj.obj_type == ObjectType::Ball {
 				ball_track = Some((obj.position, obj.velocity,));
@@ -65,8 +65,11 @@ impl GameState {
 					} else {
 						// Check if next position update will cause a collision.
 
-						obj_collider.min += delta;
-						obj_collider.max += delta;
+						if delta.x < 0.0 {
+							obj_collider.min += delta;
+						} else {
+							obj_collider.max += delta;
+						}
 
 						// Check if ball will hit the horizontal edges of the screen.
 						if center.y < obj.size.y / 2.0 || center.y > height - obj.size.y / 2.0 {
@@ -83,6 +86,7 @@ impl GameState {
 
 								// Check if this object is colliding with the ball.
 								let other = &colliders[o];
+								
 								if obj_collider.is_colliding(other) {
 									// Increase x velocity of the ball and flip it in the other direction.
 									obj.velocity.x = -(obj.velocity.x * 1.15).clamp(-obj.max_velocity.x, obj.max_velocity.x);
@@ -92,7 +96,7 @@ impl GameState {
 									// Velocity increases the further away from the center it was hit.
 									let angle = center.y - other.center.y;
 									let traj = ((angle.abs() * 2.0) / center.y).clamp(0.0, obj.max_velocity.y);
-									obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
+									//obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
 
 									// Update position delta.
 									delta.x = -delta.x;

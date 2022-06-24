@@ -29,6 +29,10 @@ pub struct Vec2 {
 }
 
 impl Vec2 {
+	pub fn new(x: f32, y: f32) -> Self {
+		Self { x:x, y:y }
+	}
+
 	pub fn set(&mut self, x: f32, y: f32) {
 		self.x = x;
 		self.y = y;
@@ -179,6 +183,11 @@ impl Object {
 
 // Implement object colliders.
 
+// Function to check if line segments intersect.
+fn ccw(a: &Vec2, b: &Vec2, c: &Vec2) -> bool {
+	(c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
+}
+
 #[derive(Copy, Clone, Debug)]
 pub struct ObjectCollider {
 	pub min: Vec2,
@@ -196,20 +205,30 @@ impl ObjectCollider {
 		}
 	}
 
+	pub fn get_hitbox(&self) -> [[Vec2; 2]; 4] {
+		[
+			[Vec2::new(self.min.x, self.min.y), Vec2::new(self.max.x, self.min.y)],
+			[Vec2::new(self.min.x, self.min.y), Vec2::new(self.min.x, self.max.y)],
+			[Vec2::new(self.min.x, self.max.y), Vec2::new(self.max.x, self.max.y)],
+			[Vec2::new(self.max.x, self.max.y), Vec2::new(self.max.x, self.min.y)]
+		]
+	}
+
 	// Check if this object is intercepting another collider.
 	pub fn is_colliding(&self, other: &Self) -> bool {
-		// TODO: Improved collision detection.
-		// This effectively only checks for a collision between the top-left and bottom-right corners of both objects.
-		(
-			self.min.x >= other.min.x
-			&& self.min.y >= other.min.y
-			&& self.min.x <= other.max.x
-			&& self.min.y <= other.max.y
-		) || (
-			self.max.x >= other.min.x
-			&& self.max.y >= other.min.y
-			&& self.max.x <= other.max.x
-			&& self.max.y <= other.max.y
-		)
+		let self_hitbox = self.get_hitbox();
+		let other_hitbox = other.get_hitbox();
+
+		let mut is_colliding = false;
+		for [a, b] in &self_hitbox {
+			for [c, d] in &other_hitbox {
+				// Check if line segments intersect. If they are, then the objects are colliding.
+				let intersect = ccw(a,c,d) != ccw(b,c,d) && ccw(a,b,c) != ccw(a,b,d);
+				if !is_colliding {
+					is_colliding = intersect;
+				}
+			}
+		}
+		is_colliding
 	}
 }
