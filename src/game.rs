@@ -19,7 +19,7 @@ impl GameState {
 		Self {
 			objects: vec![],
 			control_id: 0,
-			ai_accuracy: 0.5,
+			ai_accuracy: 0.75,
 			paused: true
 		}
 	}
@@ -117,10 +117,18 @@ impl GameState {
 					let mut y_tar = (height / 2.0) - (obj.size.y / 2.0);
 
 					// Calculate y co-ordinate the ball will intercept at
-					if is_incoming {
+					if is_incoming && y_tar > 0.0 && y_tar < height {
 						let x_diff = obj_collider.center.x - pos.x;
-						let eta = x_diff / vel.x;
-						y_tar = pos.y + (vel.y * eta);
+						let time = x_diff / vel.x;
+						let y_move = vel.y * time;
+
+						let mut y_pos = pos.y + y_move;
+						if y_pos < 0.0 {
+							y_pos = height * 0.25;
+						} else if y_pos > height {
+							y_pos = height * 0.75;
+						}
+						y_tar = y_pos;
 					}
 
 					// Interpolate position towards target co-ordinate.
