@@ -91,7 +91,7 @@ impl GameState {
 									// Ball travels upwards if it hit the upper half, and downwards if it hit the lower half.
 									// Velocity increases the further away from the center it was hit.
 									let angle = center.y - other.center.y;
-									let traj = ((angle.abs() * 2.0) / center.y).clamp(0.0, 1.0);
+									let traj = ((angle.abs() * 2.0) / center.y).clamp(0.0, obj.max_velocity.y);
 									obj.velocity.y = if angle >= 0.0 { traj } else { -traj };
 
 									// Update position delta.
@@ -117,7 +117,7 @@ impl GameState {
 					let mut y_tar = (height / 2.0) - (obj.size.y / 2.0);
 
 					// Calculate y co-ordinate the ball will intercept at
-					if is_incoming && y_tar > 0.0 && y_tar < height {
+					if is_incoming {
 						let x_diff = obj_collider.center.x - pos.x;
 						let time = x_diff / vel.x;
 						let y_move = vel.y * time;
