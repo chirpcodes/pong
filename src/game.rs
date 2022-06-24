@@ -118,7 +118,7 @@ impl GameState {
 					};
 
 					// Y co-ordinate to move towards, center of screen by default.
-					let mut y_tar = (height / 2.0) - (obj.size.y / 2.0);
+					let mut y_tar = height / 2.0;
 
 					// Calculate y co-ordinate the ball will intercept at
 					if is_incoming {
@@ -138,7 +138,7 @@ impl GameState {
 					// Interpolate position towards target co-ordinate.
 					// Accuracy affects the speed of this movement.
 					obj.position.y = (obj.position.y + (
-						y_tar - obj.size.y / 2.0 - obj.position.y
+						y_tar - (obj.size.y / 2.0) - obj.position.y
 					) * (delta_time * 0.0015 * self.ai_accuracy))
 					.clamp(0.0, height - obj.size.y);
 				},
